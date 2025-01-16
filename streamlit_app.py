@@ -35,8 +35,8 @@ def main():
 #Select Slider
     nivel = st.select_slider(
         "Selecciona tu nivel de satifacción", 
-        options=["Muy bajo", "Bajo", "Medio", "Alto", "Muy alto"]. 
-        value= "Medio"
+        options=["Muy bajo", "Bajo", "Medio", "Alto", "Muy alto"],
+        value="Medio"
     )
     st.write("Tu nivel de satifacción es": options)
     
