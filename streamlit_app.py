@@ -38,7 +38,7 @@ def main():
         options=["Muy bajo", "Bajo", "Medio", "Alto", "Muy alto"],
         value="Medio"
     )
-    st.write("Tu nivel de satifacción es": options)
+    st.write("Tu nivel de satifacción es": nivel)
     
 
 
