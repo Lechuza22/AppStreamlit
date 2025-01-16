@@ -8,9 +8,10 @@ def main():
     nombre = "Jero"    
     st.text(f"Hola {nombre}, esto es una prueba")
     st.markdown ("### Esto es un Markdown") 
-    st.sucess ("Esto es un exito")
+    
+    st.sucess("Esto es un exito")
     st.warning("ESto es una advertencia")
-    st.ingo ("Esto da información")
+    st.info("Esto da información")
     st.error ("Esto es un error")
     st.Exception("Esto es una excepción")
                
