@@ -16,12 +16,24 @@ def main():
     st.exception("Esto es una excepción")
     
     st.write (1+2)
+    ## caja de seleccion. 
     opcion = st.selectbox("Elije tu fruta", ["manzana", "naranja", "Platano", "Freza"])
     st.write(f"Tu fruta faborita es: {opcion}")
     
     ## multi select
     opciones = st.multiselect("Selecciona tu color favorito", ["Rojo", "Azul", "Amarillo", "Negro", "Blanco"])
     st.write("Tus colores favoritos son:", opciones)
+    ## Slider
+    Edad = st.slider(
+        "Selecciona tu edad",
+        min_value=0,
+        Max_value=110,
+        value=25, #valor inicial
+        step=1)
+    st.write("Tu edad es", Edad)
+
+
+
 
 
 
