@@ -4,7 +4,7 @@ def main():
     st.title("Curso de streamlit")
     st.header ("Encabezado")
     st.subheader ("subencabezado")
-    st.text ("introduce texto)
+    st.text ("Aca se pone texto")
     nombre = "Jero"    
     st.text(f"Hola {nombre}, esto es una prueba")
     st.markdown ("### Esto es un Markdown") 
