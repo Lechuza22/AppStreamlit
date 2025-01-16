@@ -19,7 +19,9 @@ def main():
     opcion = st.selectbox("Elije tu fruta", ["manzana", "naranja", "Platano", "Freza"])
     st.write(f"Tu fruta faborita es: {opcion}")
     
-    
+    ## multi select
+    opciones = st.muiltiselect("Selecciona tu color favorito", ["Rojo", "Azul", "Amarillo", "Negro", "Blanco"])
+    st.write("Tus colores favoritos son:", opciones)
 
 
 
