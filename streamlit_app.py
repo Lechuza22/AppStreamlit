@@ -9,11 +9,11 @@ def main():
     st.text(f"Hola {nombre}, esto es una prueba")
     st.markdown ("### Esto es un Markdown") 
     
-    st.sucess("Esto es un exito")
-    st.warning("ESto es una advertencia")
+    st.success("Esto es un exito")
+    st.warning("Esto es una advertencia")
     st.info("Esto da información")
     st.error ("Esto es un error")
-    st.Exception("Esto es una excepción")
+    st.exception("Esto es una excepción")
                
 if __name__== '__main__':
     main()
