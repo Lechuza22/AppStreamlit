@@ -29,8 +29,10 @@ def main():
         min_value=0,
         Max_value=110,
         value=25, #valor inicial
-        step=1)
+        step=1
+    )
     st.write("Tu edad es", Edad)
+    
 
 
 
