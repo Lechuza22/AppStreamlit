@@ -17,7 +17,7 @@ def main():
     
     st.write (1+2)
     opcion = st.selectbox("Elije tu fruta", ["manzana", "naranja", "Platano", "Freza"])
-    st.write(f"Tu fruta faborita es: {opcion})
+    st.write(f"Tu fruta faborita es: {opcion}")
     
     
 
