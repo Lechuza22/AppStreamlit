@@ -24,10 +24,10 @@ def main():
     opciones = st.multiselect("Selecciona tu color favorito", ["Rojo", "Azul", "Amarillo", "Negro", "Blanco"])
     st.write("Tus colores favoritos son:", opciones)
     ## Slider
-    Edad = st.slider(
+    edad = st.slider(
         "Selecciona tu edad",
         min_value=0,
-        Max_value=110,
+        max_value=110,
         value=25, #valor inicial
         step=1
     )
