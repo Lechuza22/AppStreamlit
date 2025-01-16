@@ -31,7 +31,7 @@ def main():
         value=25, #valor inicial
         step=1
     )
-    st.write("Tu edad es", Edad)
+    st.write("Tu edad es:", edad)
     
 
 
