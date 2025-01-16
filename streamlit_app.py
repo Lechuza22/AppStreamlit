@@ -14,6 +14,11 @@ def main():
     st.info("Esto da información")
     st.error ("Esto es un error")
     st.exception("Esto es una excepción")
-               
+    
+    st.write (1+2)
+
+
+
+
 if __name__== '__main__':
     main()
