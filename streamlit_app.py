@@ -16,7 +16,7 @@ def main():
     st.exception("Esto es una excepción")
     
     st.write (1+2)
-    opcion = st.selectbox("Elije tu fruta", ["manzana", "naranja", "Platano", "Freza"¨])
+    opcion = st.selectbox("Elije tu fruta", ["manzana", "naranja", "Platano", "Freza"])
     st.write(f"Tu fruta faborita es: {opcion})
     
     
