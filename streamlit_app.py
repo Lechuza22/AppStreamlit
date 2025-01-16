@@ -31,6 +31,12 @@ def main():
         value=25, #valor inicial
         step=1
     )
+#Select Slider
+    nivel = st.select_slider(
+        "Selecciona tu nivel de satifacción", 
+        options=["Muy bajo", "Bajo", "Medio", "Alto", "Muy alto"]. 
+        value= "Medio"
+    )
     st.write("Tu edad es:", edad)
     
 
