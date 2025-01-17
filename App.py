@@ -149,6 +149,6 @@ elif menu_option == "Recomendaciones":
         st.subheader("Modelos recomendados")
         st.write(recommended_models[["brand", "model"] + variables])
 
-elif menu_option == "Marcas y modelos":
-    st.header("Marcas y modelos")
-    st.write("Esta sección estará disponible próximamente.")  
+elif menu_option == "Predicción amortización":
+    st.header("Predicción")
+    st.write("Podrás predecir en base al valor del auto, el tiempo (meses) en el que podrás amortizar el valor del mismo respecto a los viajes y el monto de ganancia promedio por día")  
