@@ -52,11 +52,11 @@ menu_option = st.sidebar.radio(
 def load_data():
     electric_car_path = 'ElectricCarData.csv'
     taxi_trip_path = 'green_tripdata_2024-10_reducido.csv'
-    electric_data = pd.read_csv(electric_car_path)
+    data = pd.read_csv(electric_car_path)
     taxi_data = pd.read_csv(taxi_trip_path)
     return electric_data, taxi_data
 
-electric_car_data, taxi_trip_data = load_data()
+data, taxi_trip_data = load_data()
 
 if menu_option == "Comparación Marcas y Modelos":
     st.header("Comparación Marcas y Modelos")
@@ -158,12 +158,12 @@ elif menu_option == "Predicción amortización":
     st.write("Seleccione un vehículo eléctrico para predecir el tiempo estimado de amortización basado en el precio y las ganancias diarias promedio.")
 
     # Selección de marca y modelo
-    selected_brand = st.selectbox("Seleccione una marca", electric_car_data["brand"].unique(), key="amort_brand")
-    filtered_models = electric_car_data[electric_car_data["brand"] == selected_brand]["model"].unique()
+    selected_brand = st.selectbox("Seleccione una marca", data["brand"].unique(), key="amort_brand")
+    filtered_models = data[data["brand"] == selected_brand]["model"].unique()
     selected_model = st.selectbox("Seleccione un modelo", filtered_models, key="amort_model")
 
     # Filtrar datos del modelo seleccionado
-    selected_car_data = electric_car_data[(electric_car_data["brand"] == selected_brand) & (electric_car_data["model"] == selected_model)].iloc[0]
+    selected_car_data = data[(data["brand"] == selected_brand) & (data["model"] == selected_model)].iloc[0]
 
     # Mostrar información del modelo seleccionado
     st.write(f"**Precio del vehículo (USD):** {selected_car_data['priceusd']:.2f}")
