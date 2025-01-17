@@ -2,8 +2,9 @@ import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn.cluster import DBSCAN
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestRegressor
 import numpy as np
-
 # Configuración de la página
 st.set_page_config(page_title="TaxiCom2.0", layout="wide")
 
@@ -49,10 +50,13 @@ menu_option = st.sidebar.radio(
 # Cargar datos
 @st.cache_data
 def load_data():
-    file_path = 'ElectricCarData.csv'
-    return pd.read_csv(file_path)
+    electric_car_path = 'ElectricCarData.csv'
+    taxi_trip_path = 'green_tripdata_2024-10_reducido.csv'
+    electric_data = pd.read_csv(electric_car_path)
+    taxi_data = pd.read_csv(taxi_trip_path)
+    return electric_data, taxi_data
 
-data = load_data()
+electric_car_data, taxi_trip_data = load_data()
 
 if menu_option == "Comparación Marcas y Modelos":
     st.header("Comparación Marcas y Modelos")
@@ -150,5 +154,48 @@ elif menu_option == "Recomendaciones":
         st.write(recommended_models[["brand", "model"] + variables])
 
 elif menu_option == "Predicción amortización":
-    st.header("Predicción")
-    st.write("Podrás predecir en base al valor del auto, el tiempo (meses) en el que podrás amortizar el valor del mismo respecto a los viajes y el monto de ganancia promedio por día")  
+    st.header("Predicción de Amortización")
+    st.write("Seleccione un vehículo eléctrico para predecir el tiempo estimado de amortización basado en el precio y las ganancias diarias promedio.")
+
+    # Selección de marca y modelo
+    selected_brand = st.selectbox("Seleccione una marca", electric_car_data["brand"].unique(), key="amort_brand")
+    filtered_models = electric_car_data[electric_car_data["brand"] == selected_brand]["model"].unique()
+    selected_model = st.selectbox("Seleccione un modelo", filtered_models, key="amort_model")
+
+    # Filtrar datos del modelo seleccionado
+    selected_car_data = electric_car_data[(electric_car_data["brand"] == selected_brand) & (electric_car_data["model"] == selected_model)].iloc[0]
+
+    # Mostrar información del modelo seleccionado
+    st.write(f"**Precio del vehículo (USD):** {selected_car_data['priceusd']:.2f}")
+
+    # Preparar datos para el modelo de predicción
+    taxi_trip_data_filtered = taxi_trip_data[["total_amount"]].dropna()
+    X = taxi_trip_data_filtered.index.values.reshape(-1, 1)
+    y = taxi_trip_data_filtered["total_amount"].values
+
+    # Dividir los datos en entrenamiento y prueba
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+    # Entrenar modelo de RandomForestRegressor
+    model = RandomForestRegressor(n_estimators=100, random_state=42)
+    model.fit(X_train, y_train)
+
+    # Predicción del ingreso diario promedio
+    avg_total_amount_per_trip = model.predict([[len(taxi_trip_data) // 2]])[0]
+    daily_trips_per_car = 25
+    daily_revenue = daily_trips_per_car * avg_total_amount_per_trip
+    st.write(f"**Ganancia promedio diaria estimada (USD):** {daily_revenue:.2f}")
+
+    # Predicción del tiempo de amortización
+    if st.button("Predecir Amortización"):
+        car_price = selected_car_data["priceusd"]
+        months_to_amortize = car_price / (daily_revenue * 30)
+
+        # Convertir a años y meses
+        years = int(months_to_amortize // 12)
+        months = int(months_to_amortize % 12)
+
+        if years > 0:
+            st.success(f"El vehículo se amortizará en aproximadamente **{years} años y {months} meses**.")
+        else:
+            st.success(f"El vehículo se amortizará en aproximadamente **{months} meses**.")
