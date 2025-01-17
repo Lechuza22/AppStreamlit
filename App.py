@@ -43,7 +43,7 @@ st.sidebar.title("TaxiCom2.0")
 # Opciones del menú
 menu_option = st.sidebar.radio(
     "Seleccione una sección:",
-    ("Comparación Marcas y Modelos", "Recomendaciones", "Marcas y modelos")
+    ("Comparación Marcas y Modelos", "Recomendaciones", "Predicción amortización")
 )
 
 # Cargar datos
