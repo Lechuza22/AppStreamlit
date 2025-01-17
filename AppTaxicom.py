@@ -1,8 +1,7 @@
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
-from sklearn.neighbors import NearestNeighbors
-import numpy as np
+
 
 # Configuración de la página
 st.set_page_config(page_title="TaxiCom2.0", layout="wide")
