@@ -110,8 +110,8 @@ if menu_option == "Comparar marcas y modelos":
             grass_green = "#66cc33"
     
             x = range(len(selected_variables))
-            ax.bar(x, data_model1.iloc[0], width=0.4, label=model1, align="center", color=petrol_blue)
-            ax.bar([i + 0.4 for i in x], data_model2.iloc[0], width=0.4, label=model2, align="center", color=grass_green)
+            ax.bar(x, data_model1.iloc[0], width=0.4, label=model1, color=petrol_blue)
+            ax.bar([i + 0.4 for i in x], data_model2.iloc[0], width=0.4, label=model2, color=grass_green)
     
             ax.set_xticks([i + 0.2 for i in x])
             ax.set_xticklabels(selected_variables, rotation=45, fontsize=8)
