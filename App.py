@@ -5,6 +5,7 @@ from sklearn.cluster import DBSCAN
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestRegressor
 import numpy as np
+
 # Configuración de la página
 st.set_page_config(page_title="TaxiCom2.0", layout="wide")
 
@@ -50,13 +51,16 @@ menu_option = st.sidebar.radio(
 # Cargar datos
 @st.cache_data
 def load_data():
-    electric_car_path = 'ElectricCarData.csv'
-    taxi_trip_path = 'green_tripdata_2024-10_reducido.csv'
-    data = pd.read_csv(electric_car_path)
-    taxi_data = pd.read_csv(taxi_trip_path)
-    return electric_data, taxi_data
+    file_path = 'ElectricCarData.csv'
+    return pd.read_csv(file_path)
 
-data, taxi_trip_data = load_data()
+data = load_data()
+
+def load_taxi_data():
+    taxi_trip_path = 'green_tripdata_2024-10_reducido.csv'
+    return pd.read_csv(taxi_trip_path)
+
+taxi_trip_data = load_taxi_data()
 
 if menu_option == "Comparación Marcas y Modelos":
     st.header("Comparación Marcas y Modelos")
