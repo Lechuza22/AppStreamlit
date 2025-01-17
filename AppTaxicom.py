@@ -54,8 +54,8 @@ data = load_data()
 
 if menu_option == "Comparar marcas y modelos":
     st.header("Comparar marcas y modelos")
-    st.subheader ("Para comparar selecciona las marcas y modelos. Luego selecciona las variables que quieras incluir en la comparación")
-
+    st.subheader ("Marcas(Brands) y modelos")
+    st.text ("Para comparar primero selecciona las marcas y modelos, luego selecciona las variables que quieras incluir en la comparación")
     # Selección de marcas para comparación
     brands = data["brand"].unique()
     col1, col2 = st.columns(2)
