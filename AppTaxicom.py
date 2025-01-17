@@ -37,7 +37,7 @@ st.markdown(
 )
 
 # Título y logo
-st.sidebar.image("/mnt/data/Logo.png", use_container_width=True)
+st.sidebar.image("Logo.png", use_container_width=True)
 st.sidebar.title("TaxiCom2.0")
 
 # Opciones del menú
@@ -49,7 +49,7 @@ menu_option = st.sidebar.radio(
 # Cargar datos
 @st.cache_data
 def load_data():
-    file_path = '/mnt/data/ElectricCarData.csv'
+    file_path = 'ElectricCarData.csv'
     return pd.read_csv(file_path)
 
 data = load_data()
