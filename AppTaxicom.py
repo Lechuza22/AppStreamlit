@@ -99,7 +99,7 @@ if menu_option == "Comparar marcas y modelos":
     # Graficar comparación
     if selected_variables:
         st.subheader("Gráfico comparativo")
-        fig, ax = plt.subplots(figsize=(6, 4))
+        fig, ax = plt.subplots(figsize=(4, 2))
 
         x = range(len(selected_variables))
         ax.bar(x, data_model1.iloc[0], width=0.4, label=model1, align="center", color="blue")
