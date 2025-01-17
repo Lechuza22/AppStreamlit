@@ -102,7 +102,7 @@ if menu_option == "Comparar marcas y modelos":
         fig, ax = plt.subplots()
 
         x = range(len(selected_variables))
-        ax.bar(x, data_model1.iloc[0], width=0.4, label=model1, align="center", color="blue")
+        ax.bar(x, data_model1.iloc[0], width=0.2, label=model1, align="center", color="blue")
         ax.bar([i + 0.4 for i in x], data_model2.iloc[0], width=0.4, label=model2, align="center", color="orange")
 
         ax.set_xticks([i + 0.2 for i in x])
