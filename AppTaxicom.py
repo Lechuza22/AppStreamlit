@@ -149,4 +149,4 @@ elif menu_option == "Recomendaciones":
 
 elif menu_option == "Marcas y modelos":
     st.header("Marcas y modelos")
-    st.write("Esta sección estará disponible próximamente.")
+    st.write("Esta sección estará disponible próximamente prueba.")
