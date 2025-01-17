@@ -1,7 +1,5 @@
 import streamlit as st
 import pandas as pd
-from sklearn.preprocessing import StandardScaler
-from sklearn.cluster import KMeans
 import matplotlib.pyplot as plt
 
 # Configuración de la página
@@ -56,33 +54,62 @@ data = load_data()
 
 if menu_option == "Análisis de datos":
     st.header("Análisis de datos")
+
+    # Selección de marcas para comparación
+    brands = data["brand"].unique()
+    col1, col2 = st.columns(2)
+
+    with col1:
+        brand1 = st.selectbox("Seleccione la primera marca", brands, key="brand1")
+    with col2:
+        brand2 = st.selectbox("Seleccione la segunda marca", brands, key="brand2")
+
+    # Filtrar modelos por marca
+    models_brand1 = data[data["brand"] == brand1]
+    models_brand2 = data[data["brand"] == brand2]
+
+    # Selección de modelo dentro de cada marca
+    col1, col2 = st.columns(2)
     
-    # Selección de variables relevantes
-    selected_columns = ["accel", "topspeed", "range", "efficiency", "priceusd"]
-    data_filtered = data[selected_columns]
+    with col1:
+        model1 = st.selectbox("Seleccione el modelo de la primera marca", models_brand1["model"].unique(), key="model1")
+    with col2:
+        model2 = st.selectbox("Seleccione el modelo de la segunda marca", models_brand2["model"].unique(), key="model2")
 
-    # Escalado de datos
-    scaler = StandardScaler()
-    data_scaled = scaler.fit_transform(data_filtered)
+    # Mostrar variables seleccionables
+    variables = ["accel", "topspeed", "range", "efficiency", "priceusd"]
+    selected_variables = st.multiselect("Seleccione las variables a comparar", variables, default=variables)
 
-    # KMeans clustering
-    kmeans = KMeans(n_clusters=5, random_state=42)
-    data["Cluster"] = kmeans.fit_predict(data_scaled)
+    # Filtrar datos de los modelos seleccionados
+    data_model1 = data[(data["brand"] == brand1) & (data["model"] == model1)][selected_variables]
+    data_model2 = data[(data["brand"] == brand2) & (data["model"] == model2)][selected_variables]
 
-    # Visualización de resultados
-    st.subheader("Distribución de marcas por clusters")
-    cluster_counts = data.groupby(["brand", "Cluster"]).size().reset_index(name="Count")
+    # Mostrar tablas comparativas
+    col1, col2 = st.columns(2)
 
-    st.write(cluster_counts)
+    with col1:
+        st.subheader(f"Datos de {model1}")
+        st.write(data_model1)
 
-    # Gráfica de barras
-    st.subheader("Gráfica de clusters")
-    fig, ax = plt.subplots()
-    cluster_counts.groupby("Cluster")["Count"].sum().plot(kind="bar", ax=ax, color=PRIMARY_COLOR)
-    ax.set_title("Número de marcas por cluster")
-    ax.set_xlabel("Cluster")
-    ax.set_ylabel("Cantidad")
-    st.pyplot(fig)
+    with col2:
+        st.subheader(f"Datos de {model2}")
+        st.write(data_model2)
+
+    # Graficar comparación
+    if selected_variables:
+        st.subheader("Gráfico comparativo")
+        fig, ax = plt.subplots()
+
+        x = range(len(selected_variables))
+        ax.bar(x, data_model1.iloc[0], width=0.4, label=model1, align="center", color="blue")
+        ax.bar([i + 0.4 for i in x], data_model2.iloc[0], width=0.4, label=model2, align="center", color="orange")
+
+        ax.set_xticks([i + 0.2 for i in x])
+        ax.set_xticklabels(selected_variables, rotation=45)
+        ax.set_title("Comparación de modelos")
+        ax.legend()
+
+        st.pyplot(fig)
 
 elif menu_option == "Predicciones":
     st.header("Predicciones")
