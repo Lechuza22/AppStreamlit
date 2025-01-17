@@ -1,7 +1,8 @@
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
-
+from sklearn.cluster import DBSCAN
+import numpy as np
 
 # Configuración de la página
 st.set_page_config(page_title="TaxiCom2.0", layout="wide")
@@ -42,7 +43,7 @@ st.sidebar.title("TaxiCom2.0")
 # Opciones del menú
 menu_option = st.sidebar.radio(
     "Seleccione una sección:",
-    ("Comparar marcas y modelos", "Recomendaciones", "Marcas y modelos")
+    ("Comparación Marcas y Modelos", "Recomendaciones", "Marcas y modelos")
 )
 
 # Cargar datos
@@ -53,8 +54,8 @@ def load_data():
 
 data = load_data()
 
-if menu_option == "Comparar marcas y modelos":
-    st.header("Comparar marcas y modelos")
+if menu_option == "Comparación Marcas y Modelos":
+    st.header("Comparación Marcas y Modelos")
     st.subheader ("Marcas(Brands) y modelos")
     st.text ("Para comparar primero selecciona las marcas y modelos, luego selecciona las variables que quieras incluir en la comparación")
     # Selección de marcas para comparación
@@ -99,28 +100,53 @@ if menu_option == "Comparar marcas y modelos":
 
     # Graficar comparación
     if selected_variables:
-        col1, col2 = st.columns([1, 3])  # Reduce el espacio asignado al gráfico
-        with col1:
-            st.write(" ")  # Espacio vacío o texto adicional
-        with col2:
-            st.subheader("Gráfico comparativo")
-            fig, ax = plt.subplots(figsize=(6, 4))
+        st.subheader("Gráfico comparativo")
+        fig, ax = plt.subplots()
+
+        x = range(len(selected_variables))
+        ax.bar(x, data_model1.iloc[0], width=0.4, label=model1, align="center", color="blue")
+        ax.bar([i + 0.4 for i in x], data_model2.iloc[0], width=0.4, label=model2, align="center", color="orange")
+
+        ax.set_xticks([i + 0.2 for i in x])
+        ax.set_xticklabels(selected_variables, rotation=45)
+        ax.set_title("Comparación de modelos")
+        ax.legend()
+
+        st.pyplot(fig)
+
+elif menu_option == "Recomendaciones":
+    st.header("Recomendaciones")
+
+    # Selección de marca
+    selected_brand = st.selectbox("Seleccione una marca", data["brand"].unique(), key="reco_brand")
     
-            # Definir colores: azul petróleo y verde pasto
-            petrol_blue = "#006b6b"
-            grass_green = "#66cc33"
-    
-            x = range(len(selected_variables))
-            ax.bar(x, data_model1.iloc[0], width=0.4, label=model1, color=petrol_blue)
-            ax.bar([i + 0.4 for i in x], data_model2.iloc[0], width=0.4, label=model2, color=grass_green)
-    
-            ax.set_xticks([i + 0.2 for i in x])
-            ax.set_xticklabels(selected_variables, rotation=45, fontsize=8)
-            ax.set_title("Comparación de modelos", fontsize=10)
-            ax.legend(fontsize=8)
-    
-            plt.tight_layout()
-            st.pyplot(fig)
+    # Filtrar modelos por marca
+    models = data[data["brand"] == selected_brand]["model"].unique()
+    selected_model = st.selectbox("Seleccione un modelo", models, key="reco_model")
+
+    # Botón de recomendación
+    if st.button("Recomendación"):
+        # Filtrar el modelo seleccionado
+        model_data = data[(data["brand"] == selected_brand) & (data["model"] == selected_model)]
+
+        # Variables relevantes para el sistema de recomendación
+        variables = ["accel", "topspeed", "range", "efficiency", "priceusd"]
+        feature_data = data[variables]
+
+        # Crear y entrenar el modelo DBSCAN
+        dbscan = DBSCAN(eps=50, min_samples=2, metric="euclidean")
+        clusters = dbscan.fit_predict(feature_data)
+        data["cluster"] = clusters
+
+        # Encontrar el clúster del modelo seleccionado
+        selected_cluster = data.loc[data["model"] == selected_model, "cluster"].values[0]
+
+        # Filtrar modelos del mismo clúster
+        recommended_models = data[data["cluster"] == selected_cluster]
+
+        # Mostrar resultados
+        st.subheader("Modelos recomendados")
+        st.write(recommended_models[["brand", "model"] + variables])
 
 elif menu_option == "Marcas y modelos":
     st.header("Marcas y modelos")
