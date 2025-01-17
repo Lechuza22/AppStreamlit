@@ -5,10 +5,12 @@ from sklearn.cluster import DBSCAN
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestRegressor
 import numpy as np
-
-# Configuración de la página
-st.set_page_config(page_title="TaxiCom2.0", layout="wide")
-
+# Configuración de la página con el logo como ícono
+st.set_page_config(
+    page_title="TaxiCom2.0", 
+    page_icon="Logo.png",  
+    layout="wide"
+)
 # Colores de la paleta
 PRIMARY_COLOR = "#008080"  # Verde azulado del logo
 SECONDARY_COLOR = "#444444"  # Gris oscuro
