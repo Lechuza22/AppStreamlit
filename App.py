@@ -186,7 +186,7 @@ elif menu_option == "Predicción amortización":
 
     # Predicción del ingreso diario promedio
     avg_total_amount_per_trip = model.predict([[len(taxi_trip_data) // 2]])[0]
-    daily_trips_per_car = 25
+    daily_trips_per_car = 15
     daily_revenue = daily_trips_per_car * avg_total_amount_per_trip
     st.write(f"**Ganancia promedio diaria estimada (USD):** {daily_revenue:.2f}")
 
