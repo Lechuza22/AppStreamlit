@@ -41,7 +41,7 @@ st.sidebar.title("TaxiCom2.0")
 # Opciones del menú
 menu_option = st.sidebar.radio(
     "Seleccione una sección:",
-    ("Análisis de datos", "Predicciones", "Marcas y modelos")
+    ("Comparar marcas y modelos", "Recomendaciones", "Marcas y modelos")
 )
 
 # Cargar datos
@@ -52,7 +52,7 @@ def load_data():
 
 data = load_data()
 
-if menu_option == "Análisis de datos":
+if menu_option == "Comparar marcas y modelos":
     st.header("Análisis de datos")
 
     # Selección de marcas para comparación
