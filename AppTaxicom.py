@@ -1,6 +1,8 @@
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
+from sklearn.neighbors import NearestNeighbors
+import numpy as np
 
 # Configuración de la página
 st.set_page_config(page_title="TaxiCom2.0", layout="wide")
@@ -122,9 +124,36 @@ if menu_option == "Comparar marcas y modelos":
             st.pyplot(fig)
 
 
-elif menu_option == "Predicciones":
-    st.header("Predicciones")
-    st.write("Esta sección estará disponible próximamente.")
+elif menu_option == "Recomendaciones":
+    st.header("Recomendaciones")
+
+    # Selección de marca
+    selected_brand = st.selectbox("Seleccione una marca", data["brand"].unique(), key="reco_brand")
+    
+    # Filtrar modelos por marca
+    models = data[data["brand"] == selected_brand]["model"].unique()
+    selected_model = st.selectbox("Seleccione un modelo", models, key="reco_model")
+
+    # Botón de recomendación
+    if st.button("Recomendación"):
+        # Filtrar el modelo seleccionado
+        model_data = data[(data["brand"] == selected_brand) & (data["model"] == selected_model)]
+
+        # Variables relevantes para el sistema de recomendación
+        variables = ["accel", "topspeed", "range", "efficiency", "priceusd"]
+        model_features = model_data[variables].iloc[0].values.reshape(1, -1)
+
+        # Crear y entrenar el modelo KNN
+        knn = NearestNeighbors(n_neighbors=5, metric="euclidean")
+        knn.fit(data[variables])
+
+        # Encontrar los vecinos más cercanos
+        distances, indices = knn.kneighbors(model_features)
+        recommended_models = data.iloc[indices[0]]
+
+        # Mostrar resultados
+        st.subheader("Modelos recomendados")
+        st.write(recommended_models[["brand", "model"] + variables])
 
 elif menu_option == "Marcas y modelos":
     st.header("Marcas y modelos")
