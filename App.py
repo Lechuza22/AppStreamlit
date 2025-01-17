@@ -116,6 +116,7 @@ if menu_option == "Comparación Marcas y Modelos":
 
 elif menu_option == "Recomendaciones":
     st.header("Recomendaciones")
+    st.text("Para encontrar recomendaciones selecciona la marca y el modelo. Las recomendaciones son busquedas de autos similares en las variables")
 
     # Selección de marca
     selected_brand = st.selectbox("Seleccione una marca", data["brand"].unique(), key="reco_brand")
