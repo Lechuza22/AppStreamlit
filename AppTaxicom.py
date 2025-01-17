@@ -103,7 +103,7 @@ if menu_option == "Comparar marcas y modelos":
             st.write(" ")  # Espacio vacío o texto adicional
         with col2:
             st.subheader("Gráfico comparativo")
-            fig, ax = plt.subplots(figsize=(4, 3))
+            fig, ax = plt.subplots(figsize=(6, 4))
     
             # Definir colores: azul petróleo y verde pasto
             petrol_blue = "#006b6b"
