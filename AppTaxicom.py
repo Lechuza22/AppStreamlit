@@ -1,8 +1,6 @@
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
-from sklearn.cluster import DBSCAN
-import numpy as np
 
 # Configuración de la página
 st.set_page_config(page_title="TaxiCom2.0", layout="wide")
@@ -113,39 +111,6 @@ if menu_option == "Comparación Marcas y Modelos":
         ax.legend()
 
         st.pyplot(fig)
-
-elif menu_option == "Recomendaciones":
-    st.header("Recomendaciones")
-    st.write("Esta sección muestra recomendaciones de autos utilizando Machine Learning")
-    # Selección de marca
-    selected_brand = st.selectbox("Seleccione una marca", data["brand"].unique(), key="reco_brand")
-    
-    # Filtrar modelos por marca
-    models = data[data["brand"] == selected_brand]["model"].unique()
-    selected_model = st.selectbox("Seleccione un modelo", models, key="reco_model")
-     # Botón de recomendación
-    if st.button("Recomendación"):
-        # Filtrar el modelo seleccionado
-        model_data = data[(data["brand"] == selected_brand) & (data["model"] == selected_model)]
-
-        # Variables relevantes para el sistema de recomendación
-        variables = ["accel", "topspeed", "range", "efficiency", "priceusd"]
-        feature_data = data[variables]
-
-        # Crear y entrenar el modelo DBSCAN
-        dbscan = DBSCAN(eps=50, min_samples=2, metric="euclidean")
-        clusters = dbscan.fit_predict(feature_data)
-        data["cluster"] = clusters
-
-        # Encontrar el clúster del modelo seleccionado
-        selected_cluster = data.loc[data["model"] == selected_model, "cluster"].values[0]
-
-        # Filtrar modelos del mismo clúster
-        recommended_models = data[data["cluster"] == selected_cluster]
-
-        # Mostrar resultados
-        st.subheader("Modelos recomendados")
-        st.write(recommended_models[["brand", "model"] + variables])
 
 elif menu_option == "Marcas y modelos":
     st.header("Marcas y modelos")
