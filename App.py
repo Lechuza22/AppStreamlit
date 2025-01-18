@@ -56,10 +56,6 @@ GREEN_TRIP_DATA_FILE = "green_tripdata_2024-10_reducido.csv"
 @st.cache_data
 def load_data_from_bucket(bucket_name, file_path):
     try:
-        # Verificar credenciales de Google Cloud
-        if "GOOGLE_APPLICATION_CREDENTIALS" not in os.environ:
-            raise EnvironmentError("No se encontraron credenciales de Google Cloud. Configure la variable de entorno 'GOOGLE_APPLICATION_CREDENTIALS'.")
-
         storage_client = storage.Client()
         bucket = storage_client.bucket(bucket_name)
         blob = bucket.blob(file_path)
@@ -78,12 +74,12 @@ def load_electric_car_data():
 def load_green_trip_data():
     return load_data_from_bucket(BUCKET_NAME, f"{TRANSFORMED_PATH}{GREEN_TRIP_DATA_FILE}")
 
-# Cargar datasets
+# Cargar datasets sin advertencia de credenciales
 try:
     data = load_electric_car_data()
     taxi_trip_data = load_green_trip_data()
-except EnvironmentError as e:
-    st.error(str(e))
+except Exception as e:
+    st.error(f"Error al cargar los datos: {e}")
     data, taxi_trip_data = pd.DataFrame(), pd.DataFrame()
 
 # Opciones del menú
