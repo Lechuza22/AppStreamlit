@@ -192,7 +192,7 @@ elif menu_option == "Predicción amortización":
     daily_revenue = daily_trips_per_car * avg_total_amount_per_trip
 
     # Ajustar la ganancia neta considerando el 65%
-    net_daily_revenue = daily_revenue * 0.15
+    net_daily_revenue = daily_revenue * 0.18
     st.write(f"**Ganancia neta promedio diaria estimada (USD):** {net_daily_revenue:.2f}")
 
     # Predicción del tiempo de amortización
