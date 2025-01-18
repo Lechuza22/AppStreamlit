@@ -56,14 +56,74 @@ TRANSFORMED_PATH = "transformed/"
 ELECTRIC_CAR_DATA_FILE = "ElectricCarData.csv"
 GREEN_TRIP_DATA_FILE = "green_tripdata_2024-10_reducido.csv"
 
+import streamlit as st
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.cluster import DBSCAN
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestRegressor
+import numpy as np
+from google.cloud import storage
+import os
+
+# Configuración de la página con el logo como ícono
+st.set_page_config(
+    page_title="TaxiCom2.0", 
+    page_icon="Logo.png",  
+    layout="wide"
+)
+
+# Colores de la paleta
+PRIMARY_COLOR = "#008080"  # Verde azulado del logo
+SECONDARY_COLOR = "#444444"  # Gris oscuro
+BACKGROUND_COLOR = "#F4F4F4"  # Fondo claro
+
+# Estilo general
+st.markdown(
+    f"""
+    <style>
+        .css-18e3th9 {{
+            background-color: {BACKGROUND_COLOR};
+        }}
+        .stButton > button {{
+            background-color: {PRIMARY_COLOR};
+            color: white;
+            border-radius: 5px;
+        }}
+        h1 {{
+            color: {PRIMARY_COLOR};
+        }}
+        .stSidebar {{
+            background-color: {SECONDARY_COLOR};
+            color: white;
+        }}
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
+# Título y logo
+st.sidebar.image("Logo.png", use_container_width=True)
+st.sidebar.title("TaxiCom2.0")
+
+# Configuración para Google Cloud
+BUCKET_NAME = "prueba2frank"
+TRANSFORMED_PATH = "transformed/"
+ELECTRIC_CAR_DATA_FILE = "ElectricCarData.csv"
+GREEN_TRIP_DATA_FILE = "green_tripdata_2024-10_reducido.csv"
+
 # Función para cargar datos desde un bucket de Google Cloud
 @st.cache_data
 def load_data_from_bucket(bucket_name, file_path):
-    storage_client = storage.Client()
-    bucket = storage_client.bucket(bucket_name)
-    blob = bucket.blob(file_path)
-    data = blob.download_as_text()
-    return pd.read_csv(pd.compat.StringIO(data))
+    try:
+        storage_client = storage.Client()
+        bucket = storage_client.bucket(bucket_name)
+        blob = bucket.blob(file_path)
+        data = blob.download_as_text()
+        return pd.read_csv(pd.compat.StringIO(data))
+    except Exception as e:
+        st.error(f"Error al cargar datos desde el bucket: {e}")
+        return pd.DataFrame()
 
 # Lógica para cargar los datasets
 @st.cache_data
@@ -74,8 +134,13 @@ def load_electric_car_data():
 def load_green_trip_data():
     return load_data_from_bucket(BUCKET_NAME, f"{TRANSFORMED_PATH}{GREEN_TRIP_DATA_FILE}")
 
-data = load_electric_car_data()
-taxi_trip_data = load_green_trip_data()
+# Cargar datasets
+if "GOOGLE_APPLICATION_CREDENTIALS" not in os.environ:
+    st.error("No se encontraron credenciales de Google Cloud. Por favor, configure la variable de entorno 'GOOGLE_APPLICATION_CREDENTIALS'.")
+    data, taxi_trip_data = pd.DataFrame(), pd.DataFrame()
+else:
+    data = load_electric_car_data()
+    taxi_trip_data = load_green_trip_data()
 
 # Opciones del menú
 
