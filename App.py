@@ -110,7 +110,7 @@ if menu_option == "Comparación Marcas y Modelos":
 
     # Graficar comparación
     if selected_variables:
-    st.subheader("Gráficos comparativos por variable")
+        st.subheader("Gráficos comparativos por variable")
         for variable in selected_variables:
             fig, ax = plt.subplots()
     
