@@ -126,38 +126,38 @@ if menu_option == "Comparación Marcas y Modelos":
 
 elif menu_option == "Recomendaciones":
     st.header("Recomendaciones")
-    st.text("Para encontrar recomendaciones selecciona la marca y el modelo. Las recomendaciones son busquedas de autos similares en las variables")
+    st.text("Para encontrar recomendaciones selecciona la marca, modelo y las variables de interés.")
 
-    # Selección de marca
+    # Selección de marca y modelo
     selected_brand = st.selectbox("Seleccione una marca", data["brand"].unique(), key="reco_brand")
-    
-    # Filtrar modelos por marca
     models = data[data["brand"] == selected_brand]["model"].unique()
     selected_model = st.selectbox("Seleccione un modelo", models, key="reco_model")
 
-    # Botón de recomendación
+    # Selección de variables
+    variables = ["accel", "topspeed", "range", "efficiency", "priceusd"]
+    selected_variables = st.multiselect("Seleccione las variables para la recomendación", variables, default=variables)
+
     if st.button("Recomendación"):
-        # Filtrar el modelo seleccionado
-        model_data = data[(data["brand"] == selected_brand) & (data["model"] == selected_model)]
+        if selected_variables:
+            model_data = data[(data["brand"] == selected_brand) & (data["model"] == selected_model)]
+            feature_data = data[selected_variables]
 
-        # Variables relevantes para el sistema de recomendación
-        variables = ["accel", "topspeed", "range", "efficiency", "priceusd"]
-        feature_data = data[variables]
+            # Crear y entrenar el modelo DBSCAN
+            dbscan = DBSCAN(eps=50, min_samples=2, metric="euclidean")
+            clusters = dbscan.fit_predict(feature_data)
+            data["cluster"] = clusters
 
-        # Crear y entrenar el modelo DBSCAN
-        dbscan = DBSCAN(eps=50, min_samples=2, metric="euclidean")
-        clusters = dbscan.fit_predict(feature_data)
-        data["cluster"] = clusters
+            # Encontrar el clúster del modelo seleccionado
+            selected_cluster = data.loc[data["model"] == selected_model, "cluster"].values[0]
 
-        # Encontrar el clúster del modelo seleccionado
-        selected_cluster = data.loc[data["model"] == selected_model, "cluster"].values[0]
+            # Filtrar modelos del mismo clúster
+            recommended_models = data[data["cluster"] == selected_cluster]
 
-        # Filtrar modelos del mismo clúster
-        recommended_models = data[data["cluster"] == selected_cluster]
-
-        # Mostrar resultados
-        st.subheader("Modelos recomendados")
-        st.write(recommended_models[["brand", "model"] + variables])
+            # Mostrar resultados
+            st.subheader("Modelos recomendados")
+            st.write(recommended_models[["brand", "model"] + selected_variables])
+        else:
+            st.warning("Por favor, seleccione al menos una variable para realizar la recomendación.")
 
 elif menu_option == "Predicción amortización":
     st.header("Predicción de Amortización")
@@ -190,12 +190,15 @@ elif menu_option == "Predicción amortización":
     avg_total_amount_per_trip = model.predict([[len(taxi_trip_data) // 2]])[0]
     daily_trips_per_car = 15
     daily_revenue = daily_trips_per_car * avg_total_amount_per_trip
-    st.write(f"**Ganancia promedio diaria estimada (USD):** {daily_revenue:.2f}")
+
+    # Ajustar la ganancia neta considerando el 65%
+    net_daily_revenue = daily_revenue * 0.35
+    st.write(f"**Ganancia neta promedio diaria estimada (USD):** {net_daily_revenue:.2f}")
 
     # Predicción del tiempo de amortización
     if st.button("Predecir Amortización"):
         car_price = selected_car_data["priceusd"]
-        months_to_amortize = car_price / (daily_revenue * 30)
+        months_to_amortize = car_price / (net_daily_revenue * 30)
 
         # Convertir a años y meses
         years = int(months_to_amortize // 12)
