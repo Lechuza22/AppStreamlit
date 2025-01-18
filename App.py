@@ -50,19 +50,34 @@ menu_option = st.sidebar.radio(
     ("Comparación Marcas y Modelos", "Recomendaciones", "Predicción amortización")
 )
 
-# Cargar datos
+# Configuración para Google Cloud
+BUCKET_NAME = "prueba2frank"
+TRANSFORMED_PATH = "transformed/"
+ELECTRIC_CAR_DATA_FILE = "ElectricCarData.csv"
+GREEN_TRIP_DATA_FILE = "green_tripdata_2024-10_reducido.csv"
+
+# Función para cargar datos desde un bucket de Google Cloud
 @st.cache_data
-def load_data():
-    file_path = 'ElectricCarData.csv'
-    return pd.read_csv(file_path)
+def load_data_from_bucket(bucket_name, file_path):
+    storage_client = storage.Client()
+    bucket = storage_client.bucket(bucket_name)
+    blob = bucket.blob(file_path)
+    data = blob.download_as_text()
+    return pd.read_csv(pd.compat.StringIO(data))
 
-data = load_data()
+# Lógica para cargar los datasets
+@st.cache_data
+def load_electric_car_data():
+    return load_data_from_bucket(BUCKET_NAME, f"{TRANSFORMED_PATH}{ELECTRIC_CAR_DATA_FILE}")
 
-def load_taxi_data():
-    taxi_trip_path = 'green_tripdata_2024-10_reducido.csv'
-    return pd.read_csv(taxi_trip_path)
+@st.cache_data
+def load_green_trip_data():
+    return load_data_from_bucket(BUCKET_NAME, f"{TRANSFORMED_PATH}{GREEN_TRIP_DATA_FILE}")
 
-taxi_trip_data = load_taxi_data()
+data = load_electric_car_data()
+taxi_trip_data = load_green_trip_data()
+
+# Opciones del menú
 
 if menu_option == "Comparación Marcas y Modelos":
     st.header("Comparación Marcas y Modelos")
