@@ -110,18 +110,22 @@ if menu_option == "Comparación Marcas y Modelos":
 
     # Graficar comparación
     if selected_variables:
-        st.subheader("Gráfico comparativo")
+    st.subheader("Gráficos comparativos por variable")
+
+    for variable in selected_variables:
         fig, ax = plt.subplots()
 
-        x = range(len(selected_variables))
-        ax.bar(x, data_model1.iloc[0], width=0.4, label=model1, align="center", color="#107D74")
-        ax.bar([i + 0.4 for i in x], data_model2.iloc[0], width=0.4, label=model2, align="center", color="#02163F")
+        # Obtener valores para la variable seleccionada
+        value1 = data_model1[variable].values[0]
+        value2 = data_model2[variable].values[0]
 
-        ax.set_xticks([i + 0.2 for i in x])
-        ax.set_xticklabels(selected_variables, rotation=45)
-        ax.set_title("Comparación de modelos")
-        ax.legend()
+        # Crear gráfico de barras para la variable actual
+        ax.bar([model1, model2], [value1, value2], color=["#107D74", "#02163F"])
+        ax.set_title(f"Comparación de {variable.capitalize()}")
+        ax.set_ylabel(variable.capitalize())
+        ax.set_xlabel("Modelos")
 
+        # Mostrar el gráfico
         st.pyplot(fig)
 
 elif menu_option == "Recomendaciones":
