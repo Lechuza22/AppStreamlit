@@ -14,12 +14,6 @@ st.set_page_config(
     page_icon="Logo.png",  
     layout="wide"
 )
-# Configurar credenciales desde secretos
-if "GOOGLE_APPLICATION_CREDENTIALS_JSON" in st.secrets:
-    credentials_path = "/tmp/credentials.json"
-    with open(credentials_path, "w") as f:
-        f.write(st.secrets["GOOGLE_APPLICATION_CREDENTIALS_JSON"])
-    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = credentials_path
 # Colores de la paleta
 PRIMARY_COLOR = "#008080"  # Verde azulado del logo
 SECONDARY_COLOR = "#444444"  # Gris oscuro
