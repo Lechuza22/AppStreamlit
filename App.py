@@ -1,10 +1,12 @@
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
-from sklearn.cluster import DBSCAN
+from sklearn.cluster import DBSCAN, KMeans
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestRegressor
 import numpy as np
+import folium
+from folium.plugins import MarkerCluster
 
 # Configuración de la página con el logo como ícono
 st.set_page_config(
@@ -12,6 +14,7 @@ st.set_page_config(
     page_icon="Logo.png",  
     layout="wide"
 )
+
 # Colores de la paleta
 PRIMARY_COLOR = "#008080"  # Verde azulado del logo
 SECONDARY_COLOR = "#444444"  # Gris oscuro
@@ -48,27 +51,29 @@ st.sidebar.title("TaxiCom2.0")
 # Opciones del menú
 menu_option = st.sidebar.radio(
     "Seleccione una sección:",
-    ("Comparación Marcas y Modelos", "Recomendaciones", "Predicción amortización")
+    ("Comparación Marcas y Modelos", "Recomendaciones", "Predicción amortización", "Optimización de rutas para taxis")
 )
 
 # Cargar datos
 @st.cache_data
 def load_data():
-    file_path = 'ElectricCarData.csv'
+    file_path = '/mnt/data/ElectricCarData.csv'
     return pd.read_csv(file_path)
 
 data = load_data()
 
+@st.cache_data
 def load_taxi_data():
-    taxi_trip_path = 'green_tripdata_2024-10_reducido.csv'
+    taxi_trip_path = '/mnt/data/green_tripdata_2024-10_reducido.csv'
     return pd.read_csv(taxi_trip_path)
 
 taxi_trip_data = load_taxi_data()
 
 if menu_option == "Comparación Marcas y Modelos":
     st.header("Comparación Marcas y Modelos")
-    st.subheader ("Marcas(Brands) y modelos")
-    st.text ("Para comparar primero selecciona las marcas y modelos, luego selecciona las variables que quieras incluir en la comparación")
+    st.subheader("Marcas(Brands) y modelos")
+    st.text("Para comparar primero selecciona las marcas y modelos, luego selecciona las variables que quieras incluir en la comparación")
+
     # Selección de marcas para comparación
     brands = data["brand"].unique()
     col1, col2 = st.columns(2)
@@ -171,7 +176,6 @@ elif menu_option == "Recomendaciones":
         else:
             st.warning("Por favor, seleccione al menos una variable para realizar la recomendación.")
 
-
 elif menu_option == "Predicción amortización":
     st.header("Predicción de Amortización")
     st.write("Seleccione un vehículo eléctrico para predecir el tiempo estimado de amortización basado en el precio y las ganancias diarias promedio.")
@@ -221,3 +225,54 @@ elif menu_option == "Predicción amortización":
             st.success(f"El vehículo se amortizará en aproximadamente **{years} años y {months} meses**.")
         else:
             st.success(f"El vehículo se amortizará en aproximadamente **{months} meses**.")
+
+elif menu_option == "Optimización de rutas para taxis":
+    st.header("Optimización de rutas para taxis")
+    st.text("Identificación de ubicaciones clave basadas en la demanda de taxis.")
+
+    # Selección de tipo de ubicación para el clustering
+    location_type = st.radio(
+        "Seleccione el tipo de ubicación para el análisis:",
+        ("Ubicaciones de recogida (PULocationID)", "Ubicaciones de destino (DOLocationID)")
+    )
+
+    # Selección del número de clusters
+    n_clusters = st.slider("Seleccione el número de clusters:", min_value=2, max_value=20, value=5)
+
+    # Seleccionar las ubicaciones según el tipo elegido
+    if location_type == "Ubicaciones de recogida (PULocationID)":
+        locations = taxi_trip_data["PULocationID"]
+    else:
+        locations = taxi_trip_data["DOLocationID"]
+
+    # Realizar clustering con KMeans
+    location_data = locations.dropna().values.reshape(-1, 1)
+    kmeans = KMeans(n_clusters=n_clusters, random_state=42)
+    clusters = kmeans.fit_predict(location_data)
+
+    # Agregar el clúster a los datos
+    taxi_trip_data["cluster"] = clusters
+
+    # Mostrar los resultados del clustering
+    st.subheader("Resultados del clustering")
+    st.write(f"Total de clusters: {n_clusters}")
+    st.dataframe(taxi_trip_data.groupby("cluster")[["trip_distance", "total_amount"]].mean().reset_index())
+
+    # Visualización con folium
+    st.subheader("Visualización de ubicaciones en el mapa")
+
+    map_center = [40.7128, -74.0060]  # Coordenadas aproximadas de Nueva York
+    map_ = folium.Map(location=map_center, zoom_start=12)
+    marker_cluster = MarkerCluster().add_to(map_)
+
+    for _, row in taxi_trip_data.iterrows():
+        cluster = row["cluster"]
+        lat, lon = row["PULocationID"], row["DOLocationID"]  # Simulación de coordenadas
+        folium.Marker(
+            location=[lat, lon],
+            popup=f"Cluster {cluster}",
+            icon=folium.Icon(color="blue", icon="info-sign")
+        ).add_to(marker_cluster)
+
+    # Mostrar mapa en Streamlit
+    st.write(map_)
