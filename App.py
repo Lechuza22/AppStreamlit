@@ -7,22 +7,12 @@ from sklearn.ensemble import RandomForestRegressor
 import numpy as np
 from google.cloud import storage
 import os
-import json
 # Configuración de la página con el logo como ícono
-if "_RENDER_STREAMLIT_APP" not in os.environ:
-    st.set_page_config(
-        page_title="TaxiCom2.0", 
-        page_icon="Logo.png",  
-        layout="wide"
-    )
-
-# Configurar credenciales desde secretos
-if "GOOGLE_APPLICATION_CREDENTIALS_JSON" in st.secrets:
-    credentials_path = "/tmp/credentials.json"
-    with open(credentials_path, "w") as f:
-        f.write(st.secrets["GOOGLE_APPLICATION_CREDENTIALS_JSON"])
-    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = credentials_path
-
+st.set_page_config(
+    page_title="TaxiCom2.0", 
+    page_icon="Logo.png",  
+    layout="wide"
+)
 # Colores de la paleta
 PRIMARY_COLOR = "#008080"  # Verde azulado del logo
 SECONDARY_COLOR = "#444444"  # Gris oscuro
@@ -72,7 +62,7 @@ def load_data_from_bucket(bucket_name, file_path):
         data = blob.download_as_text()
         return pd.read_csv(pd.compat.StringIO(data))
     except Exception as e:
-        st.warning("No se encontraron credenciales válidas para Google Cloud. Los datos se cargarán localmente si están disponibles.")
+        st.error(f"Error al cargar datos desde el bucket: {e}")
         return pd.DataFrame()
 
 # Lógica para cargar los datasets
@@ -84,19 +74,13 @@ def load_electric_car_data():
 def load_green_trip_data():
     return load_data_from_bucket(BUCKET_NAME, f"{TRANSFORMED_PATH}{GREEN_TRIP_DATA_FILE}")
 
-# Cargar datasets
-try:
+# Verificar credenciales de Google Cloud
+if "GOOGLE_APPLICATION_CREDENTIALS" not in os.environ:
+    st.error("No se encontraron credenciales de Google Cloud. Por favor, configure la variable de entorno 'GOOGLE_APPLICATION_CREDENTIALS'.")
+    data, taxi_trip_data = pd.DataFrame(), pd.DataFrame()
+else:
     data = load_electric_car_data()
     taxi_trip_data = load_green_trip_data()
-except Exception as e:
-    st.warning("Los datos no pudieron ser cargados correctamente. Revisa la conexión con el bucket o carga datos locales.")
-    data, taxi_trip_data = pd.DataFrame(), pd.DataFrame()
-
-# Opciones del menú
-menu_option = st.sidebar.radio(
-    "Seleccione una sección:",
-    ("Comparación Marcas y Modelos", "Recomendaciones", "Predicción amortización")
-)
 
 # Opciones del menú
 menu_option = st.sidebar.radio(
