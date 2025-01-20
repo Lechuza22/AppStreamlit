@@ -195,33 +195,33 @@ elif menu_option == "Predicción amortización":
             st.success(f"El vehículo se amortizará en aproximadamente **{years} años y {months} meses**.")
         else:
             st.success(f"El vehículo se amortizará en aproximadamente **{months} meses**.")
-   
-    elif menu_option == "Categoría de valores":
-        st.header("Categoría de valores")
-        st.text("Ahora podrás agrupar los autos en tres categorías basadas en su precio (USD): Alto, Medio y Bajo.")
-    
-        # Número de clusters
-        num_clusters = 3
-    
-        # Entrenar modelo KMeans
-        price_data = data[["priceusd"]].dropna()
-        kmeans = KMeans(n_clusters=num_clusters, random_state=42)
-        data["price_category"] = kmeans.fit_predict(price_data)
-    
-        # Asignar nombres a las categorías
-        category_map = {0: "Bajo", 1: "Medio", 2: "Alto"}
-        data["price_category"] = data["price_category"].map(category_map)
-    
-        # Barra de selección para categoría
-        selected_category = st.selectbox(
-            "Seleccione una categoría de precio:",
-            ("Bajo", "Medio", "Alto")
-        )
-    
-        # Filtrar datos por la categoría seleccionada
-        filtered_data = data[data["price_category"] == selected_category]
-    
-        # Mostrar resultados
-        st.subheader(f"Autos en la categoría: {selected_category}")
-        st.write(filtered_data[["brand", "model", "priceusd", "price_category"]])
+
+elif menu_option == "Categoría de valores":
+    st.header("Categoría de valores")
+    st.text("Ahora podrás agrupar los autos en tres categorías basadas en su precio (USD): Alto, Medio y Bajo.")
+
+    # Número de clusters
+    num_clusters = 3
+
+    # Entrenar modelo KMeans
+    price_data = data[["priceusd"]].dropna()
+    kmeans = KMeans(n_clusters=num_clusters, random_state=42)
+    data["price_category"] = kmeans.fit_predict(price_data)
+
+    # Asignar nombres a las categorías
+    category_map = {0: "Bajo", 1: "Medio", 2: "Alto"}
+    data["price_category"] = data["price_category"].map(category_map)
+
+    # Barra de selección para categoría
+    selected_category = st.selectbox(
+        "Seleccione una categoría de precio:",
+        ("Bajo", "Medio", "Alto")
+    )
+
+    # Filtrar datos por la categoría seleccionada
+    filtered_data = data[data["price_category"] == selected_category]
+
+    # Mostrar resultados
+    st.subheader(f"Autos en la categoría: {selected_category}")
+    st.write(filtered_data[["brand", "model", "priceusd", "price_category"]])
 
