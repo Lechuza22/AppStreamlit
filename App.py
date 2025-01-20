@@ -7,6 +7,7 @@ from sklearn.ensemble import RandomForestRegressor
 import numpy as np
 import folium
 from folium.plugins import MarkerCluster
+from streamlit_folium import folium_static
 
 # Configuración de la página con el logo como ícono
 st.set_page_config(
@@ -297,4 +298,4 @@ elif menu_option == "Optimización de rutas para taxis":
     )
 
     # Mostrar mapa en Streamlit
-    st.write(map_)
+    folium_static(map_)
