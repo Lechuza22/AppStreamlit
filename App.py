@@ -2,6 +2,8 @@ import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn.cluster import DBSCAN, KMeans
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestRegressor
 import numpy as np
 
 # Configuración de la página con el logo como ícono
