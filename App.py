@@ -105,74 +105,47 @@ if menu_option == "Comparación Marcas y Modelos":
 
 elif menu_option == "Recomendaciones":
     st.header("Recomendaciones")
-    st.text("Encuentra recomendaciones seleccionando la marca, modelo y variables de interés.")
+    st.text("Para encontrar recomendaciones selecciona la marca, modelo y las variables de interés.")
 
-    # Submenú en la sección de recomendaciones
-    sub_option = st.selectbox(
-        "Seleccione una opción:",
-        ("Modelos similares", "Valores de los autos")
-    )
+    # Selección de marca y modelo
+    selected_brand = st.selectbox("Seleccione una marca", data["brand"].unique(), key="reco_brand")
+    models = data[data["brand"] == selected_brand]["model"].unique()
+    selected_model = st.selectbox("Seleccione un modelo", models, key="reco_model")
 
-    if sub_option == "Modelos similares":
-        # Código existente para "Modelos similares"
-        selected_brand = st.selectbox("Seleccione una marca", data["brand"].unique(), key="reco_brand")
-        models = data[data["brand"] == selected_brand]["model"].unique()
-        selected_model = st.selectbox("Seleccione un modelo", models, key="reco_model")
+    # Selección de variables
+    variables = ["accel", "topspeed", "range", "efficiency", "priceusd"]
+    selected_variables = st.multiselect("Seleccione las variables para la recomendación", variables, default=variables)
 
-        variables = ["accel", "topspeed", "range", "efficiency", "priceusd"]
-        selected_variables = st.multiselect("Seleccione las variables para la recomendación", variables, default=variables)
+    if st.button("Recomendación"):
+        if selected_variables:
+            # Filtrar los datos por las variables seleccionadas
+            feature_data = data[selected_variables]
 
-        if st.button("Recomendación"):
-            if selected_variables:
-                feature_data = data[selected_variables]
-                dbscan = DBSCAN(eps=50, min_samples=2, metric="euclidean")
-                clusters = dbscan.fit_predict(feature_data)
-                data["cluster"] = clusters
+            # Crear y entrenar el modelo DBSCAN
+            dbscan = DBSCAN(eps=50, min_samples=2, metric="euclidean")
+            clusters = dbscan.fit_predict(feature_data)
+            data["cluster"] = clusters
 
-                selected_cluster = data.loc[data["model"] == selected_model, "cluster"].values[0]
-                recommended_models = data[data["cluster"] == selected_cluster]
+            # Encontrar el clúster del modelo seleccionado
+            selected_cluster = data.loc[data["model"] == selected_model, "cluster"].values[0]
 
-                selected_features = recommended_models[selected_variables]
-                selected_model_features = selected_features.loc[data["model"] == selected_model].values[0]
-                recommended_models["distance"] = np.linalg.norm(selected_features - selected_model_features, axis=1)
+            # Filtrar modelos del mismo clúster
+            recommended_models = data[data["cluster"] == selected_cluster]
 
-                top_5_models = recommended_models.nsmallest(5, "distance")
+            # Calcular la distancia entre los modelos en el clúster y el modelo seleccionado
+            selected_features = recommended_models[selected_variables]
+            selected_model_features = selected_features.loc[data["model"] == selected_model].values[0]
+            recommended_models["distance"] = np.linalg.norm(selected_features - selected_model_features, axis=1)
 
-                st.subheader("Top 5 modelos recomendados")
-                st.write(top_5_models[["brand", "model"] + selected_variables])
-            else:
-                st.warning("Por favor, seleccione al menos una variable para realizar la recomendación.")
+            # Seleccionar los 5 modelos más cercanos al modelo seleccionado
+            top_5_models = recommended_models.nsmallest(5, "distance")
 
-    elif sub_option == "Valores de los autos":
-        st.subheader("Agrupación por valores de los autos")
-        
-        # Seleccionar número de clusters
-        st.text("Agrupa los autos en tres categorías basadas en su precio (USD): Alto, Medio y Bajo.")
-        num_clusters = 3
-
-        # Entrenar modelo KMeans
-        price_data = data[["priceusd"]].dropna()
-        kmeans = KMeans(n_clusters=num_clusters, random_state=42)
-        data["price_category"] = kmeans.fit_predict(price_data)
-
-        # Asignar nombres a las categorías
-        category_map = {0: "Bajo", 1: "Medio", 2: "Alto"}
-        data["price_category"] = data["price_category"].map(category_map)
-
-        # Barra de selección para categoría
-        selected_category = st.selectbox(
-            "Seleccione una categoría de precio:",
-            ("Bajo", "Medio", "Alto")
-        )
-
-        # Filtrar datos por la categoría seleccionada
-        filtered_data = data[data["price_category"] == selected_category]
-
-        # Mostrar resultados
-        st.subheader(f"Autos en la categoría: {selected_category}")
-        st.write(filtered_data[["brand", "model", "priceusd", "price_category"]])
-
-
+            # Mostrar los resultados
+            st.subheader("Top 5 modelos recomendados")
+            st.write(top_5_models[["brand", "model"] + selected_variables])
+        else:
+            st.warning("Por favor, seleccione al menos una variable para realizar la recomendación.")
+            
 elif menu_option == "Predicción amortización":
     st.header("Predicción de Amortización")
     st.write("Seleccione un vehículo eléctrico para predecir el tiempo estimado de amortización basado en el precio y las ganancias diarias promedio.")
