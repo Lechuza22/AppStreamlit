@@ -103,48 +103,46 @@ if menu_option == "Comparación Marcas y Modelos":
             # Mostrar el gráfico
             st.pyplot(fig)
 
-elif menu_option == "Recomendaciones":
+if menu_option == "Recomendaciones":
     st.header("Recomendaciones")
-    st.text("Para encontrar recomendaciones selecciona la marca, modelo y las variables de interés.")
+    st.text("Encuentra recomendaciones seleccionando la marca, modelo y variables de interés.")
 
-    # Selección de marca y modelo
-    selected_brand = st.selectbox("Seleccione una marca", data["brand"].unique(), key="reco_brand")
-    models = data[data["brand"] == selected_brand]["model"].unique()
-    selected_model = st.selectbox("Seleccione un modelo", models, key="reco_model")
+    # Submenú en la sección de recomendaciones
+    sub_option = st.selectbox(
+        "Seleccione una opción:",
+        ("Modelos similares", "Valores de los autos")
+    )
 
-    # Selección de variables
-    variables = ["accel", "topspeed", "range", "efficiency", "priceusd"]
-    selected_variables = st.multiselect("Seleccione las variables para la recomendación", variables, default=variables)
+    if sub_option == "Modelos similares":
+        # Código existente para "Modelos similares"
+        selected_brand = st.selectbox("Seleccione una marca", data["brand"].unique(), key="reco_brand")
+        models = data[data["brand"] == selected_brand]["model"].unique()
+        selected_model = st.selectbox("Seleccione un modelo", models, key="reco_model")
 
-    if st.button("Recomendación"):
-        if selected_variables:
-            # Filtrar los datos por las variables seleccionadas
-            feature_data = data[selected_variables]
+        variables = ["accel", "topspeed", "range", "efficiency", "priceusd"]
+        selected_variables = st.multiselect("Seleccione las variables para la recomendación", variables, default=variables)
 
-            # Crear y entrenar el modelo DBSCAN
-            dbscan = DBSCAN(eps=50, min_samples=2, metric="euclidean")
-            clusters = dbscan.fit_predict(feature_data)
-            data["cluster"] = clusters
+        if st.button("Recomendación"):
+            if selected_variables:
+                feature_data = data[selected_variables]
+                dbscan = DBSCAN(eps=50, min_samples=2, metric="euclidean")
+                clusters = dbscan.fit_predict(feature_data)
+                data["cluster"] = clusters
 
-            # Encontrar el clúster del modelo seleccionado
-            selected_cluster = data.loc[data["model"] == selected_model, "cluster"].values[0]
+                selected_cluster = data.loc[data["model"] == selected_model, "cluster"].values[0]
+                recommended_models = data[data["cluster"] == selected_cluster]
 
-            # Filtrar modelos del mismo clúster
-            recommended_models = data[data["cluster"] == selected_cluster]
+                selected_features = recommended_models[selected_variables]
+                selected_model_features = selected_features.loc[data["model"] == selected_model].values[0]
+                recommended_models["distance"] = np.linalg.norm(selected_features - selected_model_features, axis=1)
 
-            # Calcular la distancia entre los modelos en el clúster y el modelo seleccionado
-            selected_features = recommended_models[selected_variables]
-            selected_model_features = selected_features.loc[data["model"] == selected_model].values[0]
-            recommended_models["distance"] = np.linalg.norm(selected_features - selected_model_features, axis=1)
+                top_5_models = recommended_models.nsmallest(5, "distance")
 
-            # Seleccionar los 5 modelos más cercanos al modelo seleccionado
-            top_5_models = recommended_models.nsmallest(5, "distance")
+                st.subheader("Top 5 modelos recomendados")
+                st.write(top_5_models[["brand", "model"] + selected_variables])
+            else:
+                st.warning("Por favor, seleccione al menos una variable para realizar la recomendación.")
 
-            # Mostrar los resultados
-            st.subheader("Top 5 modelos recomendados")
-            st.write(top_5_models[["brand", "model"] + selected_variables])
-        else:
-            st.warning("Por favor, seleccione al menos una variable para realizar la recomendación.")
     elif sub_option == "Valores de los autos":
         st.subheader("Agrupación por valores de los autos")
         
@@ -173,6 +171,7 @@ elif menu_option == "Recomendaciones":
         # Mostrar resultados
         st.subheader(f"Autos en la categoría: {selected_category}")
         st.write(filtered_data[["brand", "model", "priceusd", "price_category"]])
+
 
 elif menu_option == "Predicción amortización":
     st.header("Predicción de Amortización")
