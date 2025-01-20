@@ -57,17 +57,44 @@ menu_option = st.sidebar.radio(
 # Cargar datos
 @st.cache_data
 def load_data():
-    file_path = 'ElectricCarData.csv'
+    file_path = '/mnt/data/ElectricCarData.csv'
     return pd.read_csv(file_path)
 
 data = load_data()
 
 @st.cache_data
 def load_taxi_data():
-    taxi_trip_path = 'green_tripdata_2024-10_reducido.csv'
+    taxi_trip_path = '/mnt/data/green_tripdata_2024-10_reducido.csv'
     return pd.read_csv(taxi_trip_path)
 
 taxi_trip_data = load_taxi_data()
+
+@st.cache_data
+def load_location_details():
+    location_details_path = '/mnt/data/transformed_taxi_zone_merged_with_locations.csv'
+    return pd.read_csv(location_details_path)
+
+location_details = load_location_details()
+
+# Unir datos de taxis con detalles de ubicación
+taxi_trip_data = taxi_trip_data.merge(location_details, left_on='PULocationID', right_on='locationid_x', how='left')
+
+def plot_map_with_clusters(data, cluster_column, lat_column, lon_column, label_column):
+    map_center = [40.7128, -74.0060]  # Coordenadas aproximadas de Nueva York
+    map_ = folium.Map(location=map_center, zoom_start=12)
+    marker_cluster = MarkerCluster().add_to(map_)
+
+    for _, row in data.iterrows():
+        cluster = row[cluster_column]
+        lat, lon = row[lat_column], row[lon_column]
+        label = row[label_column]
+        folium.Marker(
+            location=[lat, lon],
+            popup=f"Cluster {cluster}: {label}",
+            icon=folium.Icon(color="blue", icon="info-sign")
+        ).add_to(marker_cluster)
+
+    return map_
 
 if menu_option == "Comparación Marcas y Modelos":
     st.header("Comparación Marcas y Modelos")
@@ -241,38 +268,33 @@ elif menu_option == "Optimización de rutas para taxis":
 
     # Seleccionar las ubicaciones según el tipo elegido
     if location_type == "Ubicaciones de recogida (PULocationID)":
-        locations = taxi_trip_data["PULocationID"]
+        locations = taxi_trip_data[["PULocationID", "borough_latitude", "borough_longitude", "borough_x"]]
     else:
-        locations = taxi_trip_data["DOLocationID"]
+        locations = taxi_trip_data[["DOLocationID", "borough_latitude", "borough_longitude", "borough_x"]]
 
     # Realizar clustering con KMeans
-    location_data = locations.dropna().values.reshape(-1, 1)
+    location_data = locations.dropna(subset=["borough_latitude", "borough_longitude"])
+    coords = location_data[["borough_latitude", "borough_longitude"]]
     kmeans = KMeans(n_clusters=n_clusters, random_state=42)
-    clusters = kmeans.fit_predict(location_data)
+    clusters = kmeans.fit_predict(coords)
 
     # Agregar el clúster a los datos
-    taxi_trip_data["cluster"] = clusters
+    location_data["cluster"] = clusters
 
     # Mostrar los resultados del clustering
     st.subheader("Resultados del clustering")
-    st.write(f"Total de clusters: {n_clusters}")
-    st.dataframe(taxi_trip_data.groupby("cluster")[["trip_distance", "total_amount"]].mean().reset_index())
+    st.write(location_data.groupby("cluster")["borough_x"].count().reset_index().rename(columns={"borough_x": "Count"}))
 
     # Visualización con folium
     st.subheader("Visualización de ubicaciones en el mapa")
 
-    map_center = [40.7128, -74.0060]  # Coordenadas aproximadas de Nueva York
-    map_ = folium.Map(location=map_center, zoom_start=12)
-    marker_cluster = MarkerCluster().add_to(map_)
-
-    for _, row in taxi_trip_data.iterrows():
-        cluster = row["cluster"]
-        lat, lon = row["PULocationID"], row["DOLocationID"]  # Simulación de coordenadas
-        folium.Marker(
-            location=[lat, lon],
-            popup=f"Cluster {cluster}",
-            icon=folium.Icon(color="blue", icon="info-sign")
-        ).add_to(marker_cluster)
+    map_ = plot_map_with_clusters(
+        data=location_data,
+        cluster_column="cluster",
+        lat_column="borough_latitude",
+        lon_column="borough_longitude",
+        label_column="borough_x"
+    )
 
     # Mostrar mapa en Streamlit
     st.write(map_)
