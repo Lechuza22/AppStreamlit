@@ -217,9 +217,11 @@ elif menu_option == "Categoría de valores":
         "Seleccione una categoría de precio:",
         ("Bajo", "Medio", "Alto")
     )
-
     # Filtrar datos por la categoría seleccionada
     filtered_data = data[data["price_category"] == selected_category]
+
+    # Ordenar los datos de mayor a menor precio
+    filtered_data = filtered_data.sort_values(by="priceusd", ascending=False)
 
     # Mostrar resultados
     st.subheader(f"Autos en la categoría: {selected_category}")
