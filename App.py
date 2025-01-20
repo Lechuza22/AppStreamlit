@@ -5,9 +5,6 @@ from sklearn.cluster import DBSCAN, KMeans
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestRegressor
 import numpy as np
-import folium
-from folium.plugins import MarkerCluster
-from streamlit_folium import folium_static
 
 # Configuración de la página con el logo como ícono
 st.set_page_config(
@@ -23,7 +20,7 @@ st.sidebar.title("TaxiCom2.0")
 # Opciones del menú
 menu_option = st.sidebar.radio(
     "Seleccione una sección:",
-    ("Comparación Marcas y Modelos", "Recomendaciones", "Predicción amortización", "Optimización de rutas para taxis")
+    ("Comparación Marcas y Modelos", "Recomendaciones", "Predicción amortización")
 )
 
 # Cargar datos
@@ -224,49 +221,3 @@ elif menu_option == "Predicción amortización":
             st.success(f"El vehículo se amortizará en aproximadamente **{years} años y {months} meses**.")
         else:
             st.success(f"El vehículo se amortizará en aproximadamente **{months} meses**.")
-
-elif menu_option == "Optimización de rutas para taxis":
-    st.header("Optimización de rutas para taxis")
-    st.text("Identificación de ubicaciones clave basadas en la demanda de taxis.")
-
-    # Selección de tipo de ubicación para el clustering
-    location_type = st.radio(
-        "Seleccione el tipo de ubicación para el análisis:",
-        ("Ubicaciones de recogida (PULocationID)", "Ubicaciones de destino (DOLocationID)")
-    )
-
-    # Selección del número de clusters
-    n_clusters = st.slider("Seleccione el número de clusters:", min_value=1, max_value=4, value=4)
-
-    # Seleccionar las ubicaciones según el tipo elegido
-    if location_type == "Ubicaciones de recogida (PULocationID)":
-        locations = taxi_trip_data[["PULocationID", "borough_latitude", "borough_longitude", "borough_x"]]
-    else:
-        locations = taxi_trip_data[["DOLocationID", "borough_latitude", "borough_longitude", "borough_x"]]
-
-    # Realizar clustering con KMeans
-    location_data = locations.dropna(subset=["borough_latitude", "borough_longitude"]).copy()
-    coords = location_data[["borough_latitude", "borough_longitude"]]
-    kmeans = KMeans(n_clusters=n_clusters, random_state=42)
-    clusters = kmeans.fit_predict(coords)
-
-    # Agregar el clúster a los datos
-    location_data["cluster"] = clusters
-
-    # Mostrar los resultados del clustering
-    st.subheader("Resultados del clustering")
-    st.write(location_data.groupby("cluster")[["borough_x"]].count().reset_index().rename(columns={"borough_x": "Count"}))
-
-    # Visualización con folium
-    st.subheader("Visualización de ubicaciones en el mapa")
-
-    map_ = plot_map_with_clusters(
-        data=location_data,
-        cluster_column="cluster",
-        lat_column="borough_latitude",
-        lon_column="borough_longitude",
-        label_column="borough_x"
-    )
-
-    # Mostrar mapa en Streamlit
-    folium_static(map_)
