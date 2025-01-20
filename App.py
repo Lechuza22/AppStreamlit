@@ -196,9 +196,9 @@ elif menu_option == "Predicción amortización":
         else:
             st.success(f"El vehículo se amortizará en aproximadamente **{months} meses**.")
    
-    elif menu_option == "Valores de los autos":
-        st.header("Valores de los autos")
-        st.text("Agrupa los autos en tres categorías basadas en su precio (USD): Alto, Medio y Bajo.")
+    elif menu_option == "Categoría de valores":
+        st.header("Categoría de valores")
+        st.text("Ahora podrás agrupar los autos en tres categorías basadas en su precio (USD): Alto, Medio y Bajo.")
     
         # Número de clusters
         num_clusters = 3
