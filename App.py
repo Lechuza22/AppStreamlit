@@ -57,21 +57,21 @@ menu_option = st.sidebar.radio(
 # Cargar datos
 @st.cache_data
 def load_data():
-    file_path = '/mnt/data/ElectricCarData.csv'
+    file_path = 'ElectricCarData.csv'
     return pd.read_csv(file_path)
 
 data = load_data()
 
 @st.cache_data
 def load_taxi_data():
-    taxi_trip_path = '/mnt/data/green_tripdata_2024-10_reducido.csv'
+    taxi_trip_path = 'green_tripdata_2024-10_reducido.csv'
     return pd.read_csv(taxi_trip_path)
 
 taxi_trip_data = load_taxi_data()
 
 @st.cache_data
 def load_location_details():
-    location_details_path = '/mnt/data/transformed_taxi_zone_merged_with_locations.csv'
+    location_details_path = 'transformed_taxi_zone_merged_with_locations.csv'
     return pd.read_csv(location_details_path)
 
 location_details = load_location_details()
