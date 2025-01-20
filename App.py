@@ -274,7 +274,7 @@ elif menu_option == "Optimización de rutas para taxis":
         locations = taxi_trip_data[["DOLocationID", "borough_latitude", "borough_longitude", "borough_x"]]
 
     # Realizar clustering con KMeans
-    location_data = locations.dropna(subset=["borough_latitude", "borough_longitude"])
+    location_data = locations.dropna(subset=["borough_latitude", "borough_longitude"]).copy()
     coords = location_data[["borough_latitude", "borough_longitude"]]
     kmeans = KMeans(n_clusters=n_clusters, random_state=42)
     clusters = kmeans.fit_predict(coords)
@@ -284,7 +284,7 @@ elif menu_option == "Optimización de rutas para taxis":
 
     # Mostrar los resultados del clustering
     st.subheader("Resultados del clustering")
-    st.write(location_data.groupby("cluster")["borough_x"].count().reset_index().rename(columns={"borough_x": "Count"}))
+    st.write(location_data.groupby("cluster")[["borough_x"]].count().reset_index().rename(columns={"borough_x": "Count"}))
 
     # Visualización con folium
     st.subheader("Visualización de ubicaciones en el mapa")
