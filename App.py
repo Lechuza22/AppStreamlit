@@ -103,7 +103,7 @@ if menu_option == "Comparación Marcas y Modelos":
             # Mostrar el gráfico
             st.pyplot(fig)
 
-if menu_option == "Recomendaciones":
+elif menu_option == "Recomendaciones":
     st.header("Recomendaciones")
     st.text("Encuentra recomendaciones seleccionando la marca, modelo y variables de interés.")
 
