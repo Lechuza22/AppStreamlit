@@ -38,32 +38,6 @@ def load_taxi_data():
 
 taxi_trip_data = load_taxi_data()
 
-@st.cache_data
-def load_location_details():
-    location_details_path = 'transformed_taxi_zone_merged_with_locations.csv'
-    return pd.read_csv(location_details_path)
-
-location_details = load_location_details()
-
-# Unir datos de taxis con detalles de ubicación
-taxi_trip_data = taxi_trip_data.merge(location_details, left_on='PULocationID', right_on='locationid_x', how='left')
-
-def plot_map_with_clusters(data, cluster_column, lat_column, lon_column, label_column):
-    map_center = [40.7128, -74.0060]  # Coordenadas aproximadas de Nueva York
-    map_ = folium.Map(location=map_center, zoom_start=12)
-    marker_cluster = MarkerCluster().add_to(map_)
-
-    for _, row in data.iterrows():
-        cluster = row[cluster_column]
-        lat, lon = row[lat_column], row[lon_column]
-        label = row[label_column]
-        folium.Marker(
-            location=[lat, lon],
-            popup=f"Cluster {cluster}: {label}",
-            icon=folium.Icon(color="blue", icon="info-sign")
-        ).add_to(marker_cluster)
-
-    return map_
 
 if menu_option == "Comparación Marcas y Modelos":
     st.header("Comparación Marcas y Modelos")
@@ -171,6 +145,34 @@ elif menu_option == "Recomendaciones":
             st.write(top_5_models[["brand", "model"] + selected_variables])
         else:
             st.warning("Por favor, seleccione al menos una variable para realizar la recomendación.")
+    elif sub_option == "Valores de los autos":
+        st.subheader("Agrupación por valores de los autos")
+        
+        # Seleccionar número de clusters
+        st.text("Agrupa los autos en tres categorías basadas en su precio (USD): Alto, Medio y Bajo.")
+        num_clusters = 3
+
+        # Entrenar modelo KMeans
+        price_data = data[["priceusd"]].dropna()
+        kmeans = KMeans(n_clusters=num_clusters, random_state=42)
+        data["price_category"] = kmeans.fit_predict(price_data)
+
+        # Asignar nombres a las categorías
+        category_map = {0: "Bajo", 1: "Medio", 2: "Alto"}
+        data["price_category"] = data["price_category"].map(category_map)
+
+        # Barra de selección para categoría
+        selected_category = st.selectbox(
+            "Seleccione una categoría de precio:",
+            ("Bajo", "Medio", "Alto")
+        )
+
+        # Filtrar datos por la categoría seleccionada
+        filtered_data = data[data["price_category"] == selected_category]
+
+        # Mostrar resultados
+        st.subheader(f"Autos en la categoría: {selected_category}")
+        st.write(filtered_data[["brand", "model", "priceusd", "price_category"]])
 
 elif menu_option == "Predicción amortización":
     st.header("Predicción de Amortización")
