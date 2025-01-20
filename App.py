@@ -265,7 +265,7 @@ elif menu_option == "Optimización de rutas para taxis":
     )
 
     # Selección del número de clusters
-    n_clusters = st.slider("Seleccione el número de clusters:", min_value=2, max_value=20, value=5)
+    n_clusters = st.slider("Seleccione el número de clusters:", min_value=1, max_value=4, value=5)
 
     # Seleccionar las ubicaciones según el tipo elegido
     if location_type == "Ubicaciones de recogida (PULocationID)":
